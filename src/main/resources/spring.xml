@@ -6,13 +6,13 @@
  		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <bean id="client" class="com.Client">
-        <constructor-arg index="0" value="1"/>
-        <constructor-arg index="1" value="John Smith"/>
+        <property name="objectId" value="1"/>
+        <property name="name" value="John Smith"/>
     </bean>
 
     <bean id="eventLogger" class="com.logging.impl.ConsoleEventLogger" />
 
-    <bean id="app" class="com.App">
+    <bean id="application" class="com.Application">
         <constructor-arg index="0" ref="client"/>
         <constructor-arg index="1" ref="eventLogger"/>
     </bean>

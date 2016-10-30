@@ -5,15 +5,11 @@ import org.apache.log4j.Logger;
 
 public class ConsoleEventLogger implements EventLogger{
 
-    private Logger log;
+    private static final long serialVersionUID = 1;
+    private static final transient Logger LOG = Logger.getLogger(ConsoleEventLogger.class);
 
-    public void logEvent(String message) {
+    public void logEvent(final String message) {
 
-        log.info(message);
-    }
-
-    public ConsoleEventLogger() {
-
-        log = Logger.getLogger(ConsoleEventLogger.class);
+        LOG.info(message);
     }
 }

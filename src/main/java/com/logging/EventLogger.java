@@ -1,6 +1,8 @@
 package com.logging;
 
-public interface EventLogger {
+import java.io.Serializable;
+
+public interface EventLogger extends Serializable {
 
     void logEvent(String message);
 }

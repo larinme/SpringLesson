@@ -1,29 +1,36 @@
 package com;
 
-import java.math.BigInteger;
+import java.io.Serializable;
 
-public class Client {
-    private String id;
+public class Client implements Serializable{
+
+    private static final long serialVersionUID = 1;
+
+    private String objectId;
+
     private String name;
-
-    public Client(String id, String name) {
-        this.id = id;
+    public Client(final String objectId, final String name) {
+        this.objectId = objectId;
         this.name = name;
     }
 
-    public String getId() {
-        return id;
+    public Client() {}
+
+    public String getObjectId() {
+        return objectId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public Client setObjectId(final String objectId) {
+        this.objectId = objectId;
+        return this;
+    }
+
+    public Client setName(final String name) {
+        this.name = name;
+        return this;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }
