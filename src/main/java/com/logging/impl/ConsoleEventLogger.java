@@ -1,5 +1,6 @@
 package com.logging.impl;
 
+import com.logging.Event;
 import com.logging.EventLogger;
 import org.apache.log4j.Logger;
 
@@ -11,5 +12,10 @@ public class ConsoleEventLogger implements EventLogger{
     public void logEvent(final String message) {
 
         LOG.info(message);
+    }
+
+    @Override
+    public void logEvent(Event event) {
+        LOG.info(event.toString());
     }
 }

@@ -1,6 +1,7 @@
 package com;
 
 import com.google.common.collect.ImmutableMap;
+import com.logging.Event;
 import com.logging.EventLogger;
 import com.sun.istack.internal.NotNull;
 import org.springframework.context.ApplicationContext;
@@ -56,19 +57,29 @@ public class Application implements Serializable {
         Map<String, String> replacingValues = ImmutableMap.<String, String>builder()
                 .put(application.client.getObjectId(), application.client.getName())
                 .build();
-        application.logEvent("Info about 1 user", replacingValues);
+        String message = application.substituteMacroses("Info about 1 user", replacingValues);
+        //application.logEvent(message);
+
+        Event event = (Event) context.getBean("event");
+        event.setMessage(message);
+        application.logEventWithEvent(event);
 
     }
 
-    private void logEvent(String message, @NotNull Map<String, String> replacingValues) {
+    private void logEvent(String message) {
+        eventLogger.logEvent(message);
+    }
+
+    public String substituteMacroses(String message, @NotNull Map<String, String> replacingValues) {
         String logMessage = message;
         for (Map.Entry<String, String> pair : replacingValues.entrySet()) {
             logMessage = message.replaceAll(pair.getKey(), pair.getValue());
         }
-        logEventWithoutMacros(logMessage);
+        return logMessage;
     }
 
-    private void logEventWithoutMacros(String message) {
-        eventLogger.logEvent(message);
+    private void logEventWithEvent(Event event){
+
+        eventLogger.logEvent(event);
     }
 }
