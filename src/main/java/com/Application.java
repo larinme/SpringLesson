@@ -5,6 +5,9 @@ import com.logging.Event;
 import com.logging.EventLogger;
 import com.sun.istack.internal.NotNull;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.Serializable;
@@ -51,7 +54,7 @@ public class Application implements Serializable {
      */
     public static void main(String[] args) {
 
-        ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+        ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
         Application application = (Application) context.getBean("application");
 
         Map<String, String> replacingValues = ImmutableMap.<String, String>builder()
@@ -62,7 +65,13 @@ public class Application implements Serializable {
 
         Event event = (Event) context.getBean("event");
         event.setMessage(message);
-        application.logEventWithEvent(event);
+        for (int i = 0; i < 24; i++) {
+
+            application.logEventWithEvent(event);
+        }
+
+
+        context.close();
 
     }
 

@@ -29,16 +29,21 @@ public class ApplicationTest {
                 .put(client.getObjectId(), client.getName())
                 .build();
         String message =  "info about user = {0}";
-        Map<Class<?>, Object> paramTypesValues = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, application.substituteMacroses(MessageFormat.format(message, "25"), replacingValues))
+        Map<Class<?>, Object> paramTypesValuesForSubstituteMacros = ImmutableMap.<Class<?>, Object>builder()
+                .put(String.class, message)
+                .put(Map.class, replacingValues)
+                .build();
+        Map<Class<?>, Object> paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
+                .put(String.class, paramTypesValuesForSubstituteMacros)
                 .build();
 
-        invokeMethod(application, "logEvent", paramTypesValues);
+        invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
         Assert.assertTrue(eventLogger.getMsg().contains("info about user = Bob"));
-        paramTypesValues = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, application.substituteMacroses(MessageFormat.format(message, "0"), replacingValues))
+        String correctValue = application.substituteMacroses(MessageFormat.format(message, "0"), replacingValues);
+        paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
+                .put(String.class, correctValue)
                 .build();
-        invokeMethod(application, "logEvent", paramTypesValues);
+        invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
         Assert.assertTrue(eventLogger.getMsg().equals("info about user = 0"));
 
     }
