@@ -4,41 +4,16 @@
        xsi:schemaLocation="
  		http://www.springframework.org/schema/beans
  		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+    <import resource="logger.xml"/>
+    <import resource="other.xml"/>
 
     <bean id="client" class="com.Client">
         <property name="objectId" value="1"/>
         <property name="name" value="John Smith"/>
     </bean>
 
-    <bean id="eventLogger" class="com.logging.impl.ConsoleEventLogger" />
-
-    <bean id="fileEventLogger" class="com.logging.impl.FileEventLogger" init-method="init">
-        <constructor-arg index="0" ref="file"/>
-    </bean>
-
-    <bean id="cacheFileEventLogger" class="com.logging.impl.CacheFileEventLogger" destroy-method="destroy">
-        <constructor-arg index="0" ref="file"/>
-        <constructor-arg index="1" value="10"/>
-    </bean>
-
     <bean id="application" class="com.Application">
         <constructor-arg index="0" ref="client"/>
         <constructor-arg index="1" ref="cacheFileEventLogger"/>
     </bean>
-
-    <bean id="event" class="com.logging.Event" scope="prototype">
-        <constructor-arg index="0" >
-            <bean class="java.util.Date"/>
-        </constructor-arg>
-        <constructor-arg index="1" >
-            <bean class="java.text.DateFormat" factory-method="getDateTimeInstance"/>
-        </constructor-arg>
-    </bean>
-
-    <bean id="file" class="java.io.File">
-        <constructor-arg type="java.lang.String" value="logs/mala.log"/>
-    </bean>
-
-
-
 </beans>
