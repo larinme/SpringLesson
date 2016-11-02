@@ -30,21 +30,26 @@ public class ApplicationTest {
                 .build();
         String message =  "info about user = {0}";
         Map<Class<?>, Object> paramTypesValuesForSubstituteMacros = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, message)
+                .put(String.class, MessageFormat.format(message, 25))
                 .put(Map.class, replacingValues)
                 .build();
+        String correctValue = (String) invokeMethod(application, "substituteMacroses", paramTypesValuesForSubstituteMacros);
         Map<Class<?>, Object> paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, paramTypesValuesForSubstituteMacros)
+                .put(String.class, correctValue)
                 .build();
 
         invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
-        Assert.assertTrue(eventLogger.getMsg().contains("info about user = Bob"));
-        String correctValue = application.substituteMacroses(MessageFormat.format(message, "0"), replacingValues);
+        Assert.assertTrue(eventLogger.getMsg().contains(correctValue));
         paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
                 .put(String.class, correctValue)
                 .build();
+        paramTypesValuesForSubstituteMacros = ImmutableMap.<Class<?>, Object>builder()
+                .put(String.class, MessageFormat.format(message, 25))
+                .put(Map.class, replacingValues)
+                .build();
+        correctValue = (String) invokeMethod(application, "substituteMacroses", paramTypesValuesForSubstituteMacros);
         invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
-        Assert.assertTrue(eventLogger.getMsg().equals("info about user = 0"));
+        Assert.assertTrue(eventLogger.getMsg().equals(correctValue));
 
     }
 
@@ -82,7 +87,8 @@ public class ApplicationTest {
     }
 
 
-    private<T> Object invokeMethod(T instance, String methodName, Map<Class<?>, Object> paramTypesValues) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private<T> Object invokeMethod(T instance, String methodName, Map<Class<?>, Object> paramTypesValues)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         Class<?>[] paramTypes = new Class<?>[0];
         paramTypes = paramTypesValues.keySet().toArray(paramTypes);
