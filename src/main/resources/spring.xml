@@ -21,6 +21,6 @@
                 <entry key="ERROR" value-ref="combinedEventLogger"/>
             </map>
         </constructor-arg>
-        <constructor-arg index="2" ref="consoleEventLogger"/>
+        <constructor-arg index="2" ref="cacheFileEventLogger"/>
     </bean>
 </beans>
