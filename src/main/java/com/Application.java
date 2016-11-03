@@ -3,6 +3,7 @@ package com;
 import com.google.common.collect.ImmutableMap;
 import com.logging.Event;
 import com.logging.EventLogger;
+import com.logging.EventType;
 import com.sun.istack.internal.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
@@ -34,17 +35,19 @@ public class Application implements Serializable {
      *
      * @see EventLogger
      */
-    private final EventLogger eventLogger;
+    private final Map<EventType, EventLogger> eventLoggers;
+    private final EventLogger defaultLogger;
 
     /**
      * Constructor using for creation main program with all necessary beans
      *
      * @param client       Bean of Client class
-     * @param eventLogger Bean of EventLogger class
+     * @param eventLoggers Collections of beans with key = EventType and value = EventLogger class
      */
-    public Application(Client client, EventLogger eventLogger) {
+    public Application(Client client, Map<EventType, EventLogger> eventLoggers, EventLogger defaultEventLogger) {
         this.client = client;
-        this.eventLogger = eventLogger;
+        this.eventLoggers = eventLoggers;
+        this.defaultLogger = defaultEventLogger;
     }
 
     /**
@@ -65,21 +68,21 @@ public class Application implements Serializable {
 
         Event event = (Event) context.getBean("event");
         event.setMessage(message);
-        for (int i = 0; i < 24; i++) {
+        application.logEvent(EventType.INFO, event);
 
-            application.logEventWithEvent(event);
-        }
+        event.setMessage(application.substituteMacroses("Info about 0 user", replacingValues));
+        application.logEvent(EventType.ERROR, event);
 
+        event.setMessage(application.substituteMacroses("Info about 1 user", replacingValues));
+        application.logEvent(null, event);
 
         context.close();
 
     }
 
-    private void logEvent(String message) {
-        eventLogger.logEvent(message);
-    }
 
-    public String substituteMacroses(String message, @NotNull Map<String, String> replacingValues) {
+
+    private String substituteMacroses(String message, @NotNull Map<String, String> replacingValues) {
         String logMessage = message;
         for (Map.Entry<String, String> pair : replacingValues.entrySet()) {
             logMessage = message.replaceAll(pair.getKey(), pair.getValue());
@@ -87,8 +90,13 @@ public class Application implements Serializable {
         return logMessage;
     }
 
-    private void logEventWithEvent(Event event){
+    private void logEvent(EventType eventType, Event event){
 
-        eventLogger.logEvent(event);
+        EventLogger logger = eventLoggers.get(eventType);
+        if (logger == null) {
+            logger = defaultLogger;
+        }
+
+        logger.logEvent(event);
     }
 }

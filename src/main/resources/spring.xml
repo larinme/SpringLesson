@@ -10,10 +10,17 @@
     <bean id="client" class="com.Client">
         <property name="objectId" value="1"/>
         <property name="name" value="John Smith"/>
+        <property name="greetings" value="hello there"/>
     </bean>
 
     <bean id="application" class="com.Application">
         <constructor-arg index="0" ref="client"/>
-        <constructor-arg index="1" ref="cacheFileEventLogger"/>
+        <constructor-arg index="1">
+            <map>
+                <entry key="INFO" value-ref="consoleEventLogger"/>
+                <entry key="ERROR" value-ref="combinedEventLogger"/>
+            </map>
+        </constructor-arg>
+        <constructor-arg index="2" ref="consoleEventLogger"/>
     </bean>
 </beans>

@@ -3,91 +3,89 @@ package com;
 import com.google.common.collect.ImmutableMap;
 import com.logging.Event;
 import com.logging.EventLogger;
+import com.logging.EventType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
 public class ApplicationTest {
 
 
+    private static final Map<EventType, EventLogger> EVENT_LOGGERS = Collections.emptyMap();
+    private static final String INFO_ABOUT_USER = "info about user = {0}";
     private Map<String, String> replacingValues;
+    private DummyEventLogger eventLogger;
+    private Date date;
+    private DateFormat dateFormat;
+    private Application application;
+    private Event event;
 
-    @Test
-    public void testLogEventWithStringArg() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-
+    @Before
+    public void initialize() {
         Client client = new Client("25", "Bob");
-        DummyEventLogger eventLogger = new DummyEventLogger();
-        Application application = new Application(client, eventLogger);
-
+        eventLogger = new DummyEventLogger();
+        date = new Date();
+        dateFormat = DateFormat.getDateInstance();
+        application = new Application(client, EVENT_LOGGERS, eventLogger);
         replacingValues = ImmutableMap.<String, String>builder()
                 .put(client.getObjectId(), client.getName())
                 .build();
-        String message =  "info about user = {0}";
-        Map<Class<?>, Object> paramTypesValuesForSubstituteMacros = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, MessageFormat.format(message, 25))
-                .put(Map.class, replacingValues)
-                .build();
-        String correctValue = (String) invokeMethod(application, "substituteMacroses", paramTypesValuesForSubstituteMacros);
-        Map<Class<?>, Object> paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, correctValue)
-                .build();
-
-        invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
-        Assert.assertTrue(eventLogger.getMsg().contains(correctValue));
-        paramTypesValuesForLogEvent = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, correctValue)
-                .build();
-        paramTypesValuesForSubstituteMacros = ImmutableMap.<Class<?>, Object>builder()
-                .put(String.class, MessageFormat.format(message, 25))
-                .put(Map.class, replacingValues)
-                .build();
-        correctValue = (String) invokeMethod(application, "substituteMacroses", paramTypesValuesForSubstituteMacros);
-        invokeMethod(application, "logEvent", paramTypesValuesForLogEvent);
-        Assert.assertTrue(eventLogger.getMsg().equals(correctValue));
+        event = new Event(date, dateFormat);
 
     }
 
     @Test
-    public void testLogEventWithEventArg() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-
-        Client client = new Client("25", "Bob");
-        DummyEventLogger eventLogger = new DummyEventLogger();
-        Date date = new Date();
-        DateFormat dateInstance = DateFormat.getDateInstance();
-        Application application = new Application(client, eventLogger);
-
-        replacingValues = ImmutableMap.<String, String>builder()
-                .put(client.getObjectId(), client.getName())
-                .build();
-        String message = "info about user = {0}";
-        Event event = new Event(date, dateInstance);
-        Map<Class<?>, Object> paramTypesValues = ImmutableMap.<Class<?>, Object>builder()
-                .put(Event.class, event)
-                .build();
-
-        event.setMessage(application.substituteMacroses(MessageFormat.format(message, "25"), replacingValues));
-        invokeMethod(application, "logEventWithEvent", paramTypesValues);
+    public void testNullTypeLogging() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        executeTestingMethods(EventType.NULL, 25);
         Assert.assertTrue(eventLogger.getMsg().contains("info about user = Bob"));
-        Assert.assertTrue(eventLogger.getMsg().contains("id"));
-        Assert.assertTrue(eventLogger.getMsg().contains("date=" + dateInstance.format(date)));
+    }
 
-        event = new Event(date, dateInstance);
-        paramTypesValues = ImmutableMap.<Class<?>, Object>builder()
-                .put(Event.class, event)
-                .build();
-        event.setMessage(application.substituteMacroses(MessageFormat.format(message, "0"), replacingValues));
-        invokeMethod(application, "logEventWithEvent", paramTypesValues);
+    @Test
+    public void testErrorTypeLogging() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        executeTestingMethods(EventType.ERROR, 0);
         Assert.assertTrue(eventLogger.getMsg().contains("info about user = 0"));
     }
 
+    @Test
+    public void testInfoTypeLogging() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        executeTestingMethods(EventType.INFO, 25);
+        Assert.assertTrue(eventLogger.getMsg().contains("info about user = Bob"));
+        Assert.assertTrue(eventLogger.getMsg().contains("id"));
+        Assert.assertTrue(eventLogger.getMsg().contains("date=" + dateFormat.format(date)));
+    }
 
-    private<T> Object invokeMethod(T instance, String methodName, Map<Class<?>, Object> paramTypesValues)
+    private void executeTestingMethods(EventType eventType, int testId) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Map<Class<?>, Object> paramTypesValuesForSubstituteMacros = getParamsTypesValuesForSubstituteMacros(testId);
+        Map<Class<?>, Object> paramTypesValues = getParamTypesValuesForLogEvent(eventType);
+
+        event.setMessage((String) invokeMethod(application, "substituteMacroses", paramTypesValuesForSubstituteMacros));
+        invokeMethod(application, "logEvent", paramTypesValues);
+    }
+
+    private Map<Class<?>, Object> getParamTypesValuesForLogEvent(EventType eventType) {
+        return ImmutableMap.<Class<?>, Object>builder()
+                .put(EventType.class, eventType)
+                .put(Event.class, event)
+                .build();
+    }
+
+    private Map<Class<?>, Object> getParamsTypesValuesForSubstituteMacros(int id) {
+        return ImmutableMap.<Class<?>, Object>builder()
+                .put(String.class, MessageFormat.format(INFO_ABOUT_USER, id))
+                .put(Map.class, replacingValues)
+                .build();
+    }
+
+
+    private <T> Object invokeMethod(T instance, String methodName, Map<Class<?>, Object> paramTypesValues)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         Class<?>[] paramTypes = new Class<?>[0];
@@ -98,11 +96,17 @@ public class ApplicationTest {
         Method method = instance.getClass().getDeclaredMethod(methodName, paramTypes);
         method.setAccessible(true);
 
-        return method.invoke(instance, paramValues);
+        try {
+            return method.invoke(instance, paramValues);
+        } finally {
+            method.setAccessible(false);
+        }
     }
-    private class DummyEventLogger implements EventLogger{
+
+    private class DummyEventLogger implements EventLogger {
 
         private String msg;
+
         @Override
         public void logEvent(String message) {
 
@@ -115,7 +119,7 @@ public class ApplicationTest {
             this.msg = event.toString();
         }
 
-        public String getMsg() {
+        private String getMsg() {
             return msg;
         }
     }
