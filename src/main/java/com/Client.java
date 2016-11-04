@@ -35,6 +35,11 @@ public class Client implements Serializable{
         return this;
     }
 
+    public String getGreetings() {
+        return greetings;
+    }
+
+
     public String getName() {
         return name;
     }

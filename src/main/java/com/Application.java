@@ -66,6 +66,9 @@ public class Application implements Serializable {
         String message = application.substituteMacroses("Info about 1 user", replacingValues);
         //application.logEvent(message);
 
+        Client client = context.getBean(Client.class);
+        System.out.println("Client says: " + client.getGreetings());
+
         Event event = (Event) context.getBean("event");
         event.setMessage(message);
         application.logEvent(EventType.INFO, event);
