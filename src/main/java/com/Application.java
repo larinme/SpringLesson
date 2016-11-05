@@ -4,19 +4,23 @@ import com.google.common.collect.ImmutableMap;
 import com.logging.Event;
 import com.logging.EventLogger;
 import com.logging.EventType;
+import com.spring.ApplicationConfig;
+import com.spring.LoggerConfig;
 import com.sun.istack.internal.NotNull;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.Serializable;
 import java.util.Map;
 
 /**
  * The class using for demonstrating dependency injection
  */
+@Service
 public class Application implements Serializable {
 
     /**
@@ -28,15 +32,18 @@ public class Application implements Serializable {
      *
      * @see Client
      */
-    private final Client client;
+    @Autowired
+    private Client client;
 
     /**
      * Bean of EventLogger class
      *
      * @see EventLogger
      */
-    private final Map<EventType, EventLogger> eventLoggers;
-    private final EventLogger defaultLogger;
+    @Resource(name = "loggerMap")
+    private Map<EventType, EventLogger> eventLoggers;
+    @Resource(name = "defaultLogger")
+    private EventLogger defaultLogger;
 
     /**
      * Constructor using for creation main program with all necessary beans
@@ -44,10 +51,16 @@ public class Application implements Serializable {
      * @param client       Bean of Client class
      * @param eventLoggers Collections of beans with key = EventType and value = EventLogger class
      */
-    public Application(Client client, Map<EventType, EventLogger> eventLoggers, EventLogger defaultEventLogger) {
+    public Application(
+            Client client,
+            Map<EventType, EventLogger> eventLoggers,
+            EventLogger defaultEventLogger) {
         this.client = client;
         this.eventLoggers = eventLoggers;
         this.defaultLogger = defaultEventLogger;
+    }
+
+    public Application() {
     }
 
     /**
@@ -57,41 +70,33 @@ public class Application implements Serializable {
      */
     public static void main(String[] args) {
 
-        ConfigurableApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
-        Application application = (Application) context.getBean("application");
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+        ctx.register(ApplicationConfig.class, LoggerConfig.class);
+        ctx.scan("com");
+        ctx.refresh();
 
-        Map<String, String> replacingValues = ImmutableMap.<String, String>builder()
-                .put(application.client.getObjectId(), application.client.getName())
-                .build();
-        String message = application.substituteMacroses("Info about 1 user", replacingValues);
-        //application.logEvent(message);
+        Application app = (Application) ctx.getBean("application");
 
-        Client client = context.getBean(Client.class);
+        Client client = ctx.getBean(Client.class);
         System.out.println("Client says: " + client.getGreetings());
 
-        Event event = (Event) context.getBean("event");
-        event.setMessage(message);
-        application.logEvent(EventType.INFO, event);
+        Event event = ctx.getBean(Event.class);
+        event.setMessage("Some event for 1");
+        app.logEvent(EventType.INFO, event);
 
-        event.setMessage(application.substituteMacroses("Info about 0 user", replacingValues));
-        application.logEvent(EventType.ERROR, event);
+        event = ctx.getBean(Event.class);
+        event.setMessage("Some event for 2");
 
-        event.setMessage(application.substituteMacroses("Info about 1 user", replacingValues));
-        application.logEvent(null, event);
+        app.logEvent(EventType.ERROR, event);
 
-        context.close();
+        event = ctx.getBean(Event.class);
+        event.setMessage("Some event for 3");
 
+        app.logEvent(null, event);
+
+        ctx.close();
     }
 
-
-
-    private String substituteMacroses(String message, @NotNull Map<String, String> replacingValues) {
-        String logMessage = message;
-        for (Map.Entry<String, String> pair : replacingValues.entrySet()) {
-            logMessage = message.replaceAll(pair.getKey(), pair.getValue());
-        }
-        return logMessage;
-    }
 
     private void logEvent(EventType eventType, Event event){
 
@@ -100,6 +105,8 @@ public class Application implements Serializable {
             logger = defaultLogger;
         }
 
+        String message = event.getMessage();
+        event.setMessage(message.replaceAll(client.getObjectId(), client.getName()));
         logger.logEvent(event);
     }
 }

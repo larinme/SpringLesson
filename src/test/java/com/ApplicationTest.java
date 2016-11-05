@@ -107,11 +107,7 @@ public class ApplicationTest {
 
         private String msg;
 
-        @Override
-        public void logEvent(String message) {
 
-            this.msg = message;
-        }
 
         @Override
         public void logEvent(Event event) {

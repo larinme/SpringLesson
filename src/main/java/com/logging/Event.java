@@ -1,14 +1,29 @@
 package com.logging;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import java.text.DateFormat;
 import java.util.Date;
 
+@Component
+@Scope(value = "prototype")
 public class Event {
 
     private final int id = (int) (Math.random() * 100);
-    private final Date date;
-    private final DateFormat dateFormat;
+    @Autowired
+    @Qualifier("newDate")
+    private Date date;
+
+    @Autowired
+    private DateFormat dateFormat;
+
     private String message;
+    public Event(){
+
+    }
 
     public Event(final Date date, final DateFormat dateFormatter){
 
@@ -27,6 +42,14 @@ public class Event {
     public Event setMessage(String message) {
         this.message = message;
         return this;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setDateFormat(DateFormat dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
     public Date getDate() {

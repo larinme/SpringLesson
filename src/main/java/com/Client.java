@@ -2,7 +2,7 @@ package com;
 
 import java.io.Serializable;
 
-public class Client implements Serializable{
+public class Client implements Serializable {
 
     private static final long serialVersionUID = 1;
 
@@ -15,7 +15,8 @@ public class Client implements Serializable{
         this.name = name;
     }
 
-    public Client() {}
+    public Client() {
+    }
 
     public String getObjectId() {
         return objectId;
@@ -30,9 +31,8 @@ public class Client implements Serializable{
         this.greetings = greetings;
     }
 
-    public Client setName(final String name) {
+    public void setName(final String name) {
         this.name = name;
-        return this;
     }
 
     public String getGreetings() {
