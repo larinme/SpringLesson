@@ -3,14 +3,12 @@ package com.logging.impl;
 import com.logging.Event;
 import com.logging.EventLogger;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileLockInterruptionException;
 
 @Component
 public class FileEventLogger implements EventLogger {
@@ -30,11 +28,12 @@ public class FileEventLogger implements EventLogger {
         }
 
     }
-    public FileEventLogger(){
+
+    public FileEventLogger() {
 
     }
 
-    public FileEventLogger(File file){
+    public FileEventLogger(File file) {
 
         this.logFile = file;
     }

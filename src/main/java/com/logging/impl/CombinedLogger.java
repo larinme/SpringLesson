@@ -14,7 +14,7 @@ public class CombinedLogger implements EventLogger {
     @Resource(name = "combinedLoggers")
     private Collection<EventLogger> loggers;
 
-    public CombinedLogger(List<EventLogger> loggers){
+    public CombinedLogger(List<EventLogger> loggers) {
         super();
         this.loggers = loggers;
     }

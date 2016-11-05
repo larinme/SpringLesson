@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -13,19 +14,19 @@ import java.util.Date;
 public class Event {
 
     private final int id = (int) (Math.random() * 100);
-    @Autowired
-    @Qualifier("newDate")
+    @Resource(name = "newDate")
     private Date date;
 
-    @Autowired
+    @Resource(name = "dateFormat")
     private DateFormat dateFormat;
 
     private String message;
-    public Event(){
+
+    public Event() {
 
     }
 
-    public Event(final Date date, final DateFormat dateFormatter){
+    public Event(final Date date, final DateFormat dateFormatter) {
 
         this.date = date;
         this.dateFormat = dateFormatter;

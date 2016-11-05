@@ -1,5 +1,4 @@
 package com.utils;
-import javax.annotation.PostConstruct;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
@@ -8,6 +7,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Component
 public class AwareBean implements ApplicationContextAware, BeanNameAware,

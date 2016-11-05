@@ -1,7 +1,6 @@
 package com.spring;
 
 import com.Client;
-import com.logging.Event;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,17 +18,17 @@ public class ApplicationConfig {
     private Environment environment;
 
     @Bean
-    public Date newDate(){
+    public Date newDate() {
         return new Date();
     }
 
     @Bean
-    public DateFormat dateFormat(){
+    public DateFormat dateFormat() {
         return DateFormat.getDateInstance();
     }
 
     @Bean
-    public Client getClient(){
+    public Client getClient() {
 
         Client client = new Client();
         client.setObjectId(environment.getRequiredProperty("id"));

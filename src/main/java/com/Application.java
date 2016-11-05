@@ -1,16 +1,12 @@
 package com;
 
-import com.google.common.collect.ImmutableMap;
 import com.logging.Event;
 import com.logging.EventLogger;
 import com.logging.EventType;
 import com.spring.ApplicationConfig;
 import com.spring.LoggerConfig;
-import com.sun.istack.internal.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -98,7 +94,7 @@ public class Application implements Serializable {
     }
 
 
-    private void logEvent(EventType eventType, Event event){
+    private void logEvent(EventType eventType, Event event) {
 
         EventLogger logger = eventLoggers.get(eventType);
         if (logger == null) {

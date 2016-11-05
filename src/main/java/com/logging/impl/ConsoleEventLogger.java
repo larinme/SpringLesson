@@ -5,7 +5,7 @@ import com.logging.EventLogger;
 import org.springframework.stereotype.Component;
 
 @Component("consoleEventLogger")
-public class ConsoleEventLogger implements EventLogger{
+public class ConsoleEventLogger implements EventLogger {
 
     private static final long serialVersionUID = 1;
 
